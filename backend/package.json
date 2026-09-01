@@ -26,9 +26,14 @@
     "joi": "^18.2.9",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.3.3",
+    "multer": "^2.4.0",
     "node-cron": "^4.6.0",
+    "nodemailer": "^10.0.10",
+    "pdf-parse": "^2.4.5",
     "swagger-jsdoc": "^6.3.0",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "tesseract.js": "^7.0.0",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
