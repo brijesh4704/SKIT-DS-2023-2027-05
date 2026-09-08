@@ -45,6 +45,60 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
 
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    // Organization verification is intentionally separate from
+    // email verification. A verified email does NOT prove that
+    // an account represents a real hospital/blood bank.
+    organizationVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    organizationVerificationStatus: {
+      type: String,
+      enum: [
+        "NOT_REQUIRED",
+        "PENDING",
+        "VERIFIED",
+        "REJECTED",
+        "UNAVAILABLE",
+      ],
+      default: "NOT_REQUIRED",
+    },
+
+    organizationVerificationSource: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    organizationVerificationMessage: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    organizationVerifiedAt: {
+      type: Date,
+      default: null,
+    },
+
+
+emailVerificationOTP: {
+  type: String,
+  default: null,
+},
+
+emailVerificationOTPExpires: {
+  type: Date,
+  default: null,
+},
+
+
     isActive: {
       type: Boolean,
       default: true,

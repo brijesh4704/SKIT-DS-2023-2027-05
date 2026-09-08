@@ -1,4 +1,11 @@
+
 const mongoose = require("mongoose");
+
+const isValidLatitude = (value) =>
+  Number.isFinite(value) && value >= -90 && value <= 90;
+
+const isValidLongitude = (value) =>
+  Number.isFinite(value) && value >= -180 && value <= 180;
 
 const donorSchema = new mongoose.Schema(
   {
@@ -12,7 +19,11 @@ const donorSchema = new mongoose.Schema(
     bloodGroup: {
       type: String,
       required: true,
-      enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-","UNKNOWN"],
+      enum: [
+        "A+", "A-", "B+", "B-",
+        "AB+", "AB-", "O+", "O-",
+        "UNKNOWN",
+      ],
     },
 
     dateOfBirth: {
@@ -52,15 +63,24 @@ const donorSchema = new mongoose.Schema(
           type: Number,
           min: -90,
           max: 90,
+          validate: {
+            validator: (value) =>
+              value == null || isValidLatitude(value),
+            message: "Invalid latitude",
+          },
         },
 
         longitude: {
           type: Number,
           min: -180,
           max: 180,
+          validate: {
+            validator: (value) =>
+              value == null || isValidLongitude(value),
+            message: "Invalid longitude",
+          },
         },
 
-        // GeoJSON Point
         geoPoint: {
           type: {
             type: String,
@@ -69,19 +89,23 @@ const donorSchema = new mongoose.Schema(
 
           coordinates: {
             type: [Number],
-
             validate: {
               validator: function (value) {
+                if (value == null) return true;
+
+                if (!Array.isArray(value) || value.length !== 2) {
+                  return false;
+                }
+
+                const [longitude, latitude] = value;
+
                 return (
-                  value.length === 2 &&
-                  value[0] >= -180 &&
-                  value[0] <= 180 &&
-                  value[1] >= -90 &&
-                  value[1] <= 90
+                  isValidLongitude(longitude) &&
+                  isValidLatitude(latitude)
                 );
               },
-
-              message: "Invalid GeoJSON coordinates",
+              message:
+                "Invalid GeoJSON coordinates. Expected [longitude, latitude].",
             },
           },
         },
@@ -101,6 +125,7 @@ const donorSchema = new mongoose.Schema(
     totalDonations: {
       type: Number,
       default: 0,
+      min: 0,
     },
 
     medicalEligible: {
@@ -127,23 +152,15 @@ const donorSchema = new mongoose.Schema(
       max: 5,
     },
   },
-
   {
     timestamps: true,
   }
 );
 
-// ==========================================
-// GEOSPATIAL INDEX
-// ==========================================
-
+// GeoJSON coordinates must be [longitude, latitude].
 donorSchema.index({
   "location.coordinates.geoPoint": "2dsphere",
 });
-
-// ==========================================
-// DONOR SEARCH INDEX
-// ==========================================
 
 donorSchema.index({
   bloodGroup: 1,
