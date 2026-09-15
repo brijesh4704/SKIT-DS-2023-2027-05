@@ -13,6 +13,7 @@ const bloodGroups = [
   "AB-",
   "O+",
   "O-",
+  "UNKNOWN",
 ];
 
 const publicRoles = [
@@ -52,10 +53,177 @@ const registerSchema = Joi.object({
     .max(128)
     .required(),
 
-  // ADMIN intentionally excluded
   role: Joi.string()
     .valid(...publicRoles)
     .default("DONOR"),
+
+  // Hospital verification identity
+  hfrId: Joi.string()
+    .trim()
+    .max(100)
+    .when("role", {
+      is: "HOSPITAL",
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
+
+  registrationNumber: Joi.string()
+    .trim()
+    .max(120)
+    .when("role", {
+      is: "HOSPITAL",
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
+
+  registrationAuthority: Joi.string()
+    .trim()
+    .max(150)
+    .optional(),
+
+  // Organization details
+  address: Joi.string()
+    .trim()
+    .max(500)
+    .when("role", {
+      is: Joi.valid("HOSPITAL", "BLOOD_BANK"),
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
+
+  city: Joi.string()
+    .trim()
+    .min(2)
+    .max(100)
+    .when("role", {
+      is: Joi.valid("HOSPITAL", "BLOOD_BANK"),
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
+
+  state: Joi.string()
+    .trim()
+    .min(2)
+    .max(100)
+    .when("role", {
+      is: Joi.valid("HOSPITAL", "BLOOD_BANK"),
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
+
+  pincode: Joi.string()
+    .trim()
+    .pattern(/^[0-9]{6}$/)
+    .optional(),
+
+  officialEmail: Joi.string()
+    .trim()
+    .lowercase()
+    .email()
+    .optional(),
+
+  contactPersonName: Joi.string()
+    .trim()
+    .max(100)
+    .optional(),
+
+  contactPersonDesignation: Joi.string()
+    .trim()
+    .max(120)
+    .optional(),
+
+  website: Joi.string()
+    .trim()
+    .uri()
+    .optional(),
+
+  // Blood-bank verification identity
+  licenseNumber: Joi.string()
+    .trim()
+    .max(120)
+    .when("role", {
+      is: "BLOOD_BANK",
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
+
+  eraktkoshId: Joi.string()
+    .trim()
+    .max(120)
+    .optional(),
+
+  firstRegistrationDate: Joi.date()
+    .iso()
+    .optional(),
+
+  licenseStartDate: Joi.date()
+    .iso()
+    .optional(),
+
+  licenseEndDate: Joi.date()
+    .iso()
+    .greater(Joi.ref("licenseStartDate"))
+    .optional(),
+
+  category: Joi.string()
+    .trim()
+    .max(120)
+    .optional(),
+
+  dghsSupported: Joi.string()
+    .trim()
+    .max(50)
+    .optional(),
+
+  componentFacility: Joi.string()
+    .trim()
+    .max(50)
+    .optional(),
+
+  apheresisFacility: Joi.string()
+    .trim()
+    .max(50)
+    .optional(),
+
+  helplineNumber: Joi.string()
+    .trim()
+    .max(30)
+    .optional(),
+
+  donorTypes: Joi.alternatives()
+    .try(
+      Joi.array().items(Joi.string().max(100)),
+      Joi.string().max(1000)
+    )
+    .optional(),
+
+  donationTypes: Joi.alternatives()
+    .try(
+      Joi.array().items(Joi.string().max(100)),
+      Joi.string().max(1000)
+    )
+    .optional(),
+
+  componentTypes: Joi.alternatives()
+    .try(
+      Joi.array().items(Joi.string().max(100)),
+      Joi.string().max(2000)
+    )
+    .optional(),
+
+  bagTypes: Joi.alternatives()
+    .try(
+      Joi.array().items(Joi.string().max(100)),
+      Joi.string().max(2000)
+    )
+    .optional(),
+
+  ttiTypes: Joi.alternatives()
+    .try(
+      Joi.array().items(Joi.string().max(100)),
+      Joi.string().max(1000)
+    )
+    .optional(),
 });
 
 // ==========================================
@@ -89,9 +257,11 @@ const donorRegisterSchema = Joi.object({
     .max(128)
     .required(),
 
+  // Blood group is optional during registration.
+  // UNKNOWN means donor does not know it yet.
   bloodGroup: Joi.string()
     .valid(...bloodGroups)
-    .required(),
+    .default("UNKNOWN"),
 
   dateOfBirth: Joi.date()
     .iso()
@@ -106,6 +276,7 @@ const donorRegisterSchema = Joi.object({
     )
     .optional(),
 
+  // Location
   city: Joi.string()
     .trim()
     .min(2)
