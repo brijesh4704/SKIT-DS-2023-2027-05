@@ -1,979 +1,367 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  ArrowRight,
-  Check,
-  Eye,
-  EyeOff,
-  Loader2,
-  LocateFixed,
-  Lock,
-  Mail,
-  MapPin,
-  Phone,
-  User,
+  AlertCircle, ArrowRight, Building2, Check, ChevronDown, ChevronLeft,
+  ChevronRight, Eye, EyeOff, FileCheck2, FileText, Hospital, Landmark,
+  Loader2, LocateFixed, Lock, Mail, MapPin, Phone, ShieldCheck, Sparkles,
+  Upload, User, X
 } from "lucide-react";
-
 import BloodCells3D from "@/components/BloodCells3D";
+import "./register.css";
 
 type Role = "DONOR" | "HOSPITAL" | "BLOOD_BANK";
 
-const API =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "http://localhost:5000";
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-const bloodGroups = [
-  "A+",
-  "A-",
-  "B+",
-  "B-",
-  "AB+",
-  "AB-",
-  "O+",
-  "O-",
+const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+const states = ["Rajasthan","Delhi","Haryana","Uttar Pradesh","Madhya Pradesh","Gujarat","Maharashtra","Punjab","Himachal Pradesh","Uttarakhand","Bihar","Other"];
+const facilityTypes = ["Multi-Speciality Hospital","General Hospital","Government Hospital","Private Hospital","Medical College Hospital","Clinic / Nursing Home","Other"];
+const ownershipTypes = ["Government","Private","Trust / NGO","Public-Private Partnership","Other"];
+const bankCategories = ["Government","Private","Charitable / NGO","Hospital Blood Centre","Regional Blood Centre","Other"];
+
+const roles = [
+  { value:"DONOR" as Role, title:"Blood Donor", desc:"Donate blood and help save lives", icon:User, status:"MATCHING READY" },
+  { value:"HOSPITAL" as Role, title:"Hospital", desc:"Manage emergency blood requests", icon:Hospital, status:"HFR VERIFIED" },
+  { value:"BLOOD_BANK" as Role, title:"Blood Bank", desc:"Manage inventory and blood requests", icon:Landmark, status:"LICENCE VERIFIED" },
 ];
 
-const roles: {
-  value: Role;
-  title: string;
-  description: string;
-  icon: string;
-}[] = [
-  {
-    value: "DONOR",
-    title: "Blood Donor",
-    description: "Donate blood and help save lives",
-    icon: "🩸",
-  },
-  {
-    value: "HOSPITAL",
-    title: "Hospital",
-    description: "Manage emergency blood requests",
-    icon: "🏥",
-  },
-  {
-    value: "BLOOD_BANK",
-    title: "Blood Bank",
-    description: "Manage blood inventory and requests",
-    icon: "🏦",
-  },
-];
+const initialForm = {
+  name:"", email:"", phone:"", password:"", confirmPassword:"",
+  bloodGroup:"", city:"", state:"", latitude:"", longitude:"",
+  address:"", pincode:"", hfrId:"", registrationNumber:"",
+  registrationAuthority:"", facilityType:"", ownershipType:"",
+  licenseNumber:"", eraktkoshId:"", firstRegistrationDate:"",
+  licenseStartDate:"", licenseEndDate:"", category:"",
+  contactPersonName:"", contactPersonDesignation:"", website:"",
+  numberOfBeds:"", componentFacility:"", apheresisFacility:"",
+  helplineNumber:"", donorTypes:"", donationTypes:"", componentTypes:"",
+  bagTypes:"", ttiTypes:""
+};
 
-export default function RegisterPage() {
-  const router = useRouter();
+function Field({label,value,onChange,placeholder,type="text",required=false,icon:Icon}:any){
+  return <label className="form-field">
+    <span className="field-label">{label}{required && <b style={{color:"#d12658"}}> *</b>}</span>
+    <span className="input-wrap">
+      {Icon && <Icon size={16} className="input-icon"/>}
+      <input type={type} value={value} placeholder={placeholder} required={required}
+        onChange={e=>onChange(e.target.value)}/>
+    </span>
+  </label>
+}
 
-  const [role, setRole] = useState<Role>("DONOR");
+function SelectBox({label,value,options,onChange,placeholder="Select",required=false}:any){
+  return <label className="form-field">
+    <span className="field-label">{label}{required && <b style={{color:"#d12658"}}> *</b>}</span>
+    <span className="input-wrap">
+      <select value={value} required={required} onChange={e=>onChange(e.target.value)}>
+        <option value="">{placeholder}</option>
+        {options.map((x:string)=><option key={x} value={x}>{x}</option>)}
+      </select>
+    </span>
+  </label>
+}
 
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
-    bloodGroup: "",
-    city: "",
-    state: "",
-    latitude: "",
-    longitude: "",
-  });
+function PasswordField({label,value,onChange,visible,setVisible}:any){
+  return <label className="form-field">
+    <span className="field-label">{label}<b style={{color:"#d12658"}}> *</b></span>
+    <span className="input-wrap">
+      <Lock size={16} className="input-icon"/>
+      <input type={visible?"text":"password"} value={value} onChange={e=>onChange(e.target.value)} required/>
+      <button type="button" className="eye-btn" onClick={()=>setVisible(!visible)}>
+        {visible?<EyeOff size={15}/>:<Eye size={15}/>}
+      </button>
+    </span>
+  </label>
+}
 
-  const [showPassword, setShowPassword] =
-    useState(false);
+export default function RegisterPage(){
+  const router=useRouter();
+  const fileRef=useRef<HTMLInputElement>(null);
+  const [role,setRole]=useState<Role>("DONOR");
+  const [form,setForm]=useState(initialForm);
+  const [file,setFile]=useState<File|null>(null);
+  const [step,setStep]=useState(1);
+  const [showPass,setShowPass]=useState(false);
+  const [showConfirm,setShowConfirm]=useState(false);
+  const [locationLoading,setLocationLoading]=useState(false);
+  const [locationCaptured,setLocationCaptured]=useState(false);
+  const [loading,setLoading]=useState(false);
+  const [error,setError]=useState("");
 
-  const [showConfirmPassword, setShowConfirmPassword] =
-    useState(false);
+  const totalSteps=role==="DONOR"?2:3;
+  const set=(key:keyof typeof form,value:string)=>setForm(p=>({...p,[key]:value}));
 
-  const [locationLoading, setLocationLoading] =
-    useState(false);
-
-  const [locationCaptured, setLocationCaptured] =
-    useState(false);
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [error, setError] =
-    useState("");
-
-  const updateField = (
-    field: keyof typeof form,
-    value: string
-  ) => {
-    setForm((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+  const switchRole=(next:Role)=>{
+    setRole(next); setStep(1); setFile(null); setError(""); setLocationCaptured(false);
   };
 
-  // ==========================================
-  // CURRENT GPS LOCATION
-  // ==========================================
-
-  const getCurrentLocation = () => {
+  const getLocation=()=>{
     setError("");
-
-    if (!navigator.geolocation) {
-      setError(
-        "Your browser does not support location services."
-      );
-      return;
-    }
-
+    if(!navigator.geolocation){setError("Your browser does not support location services.");return}
     setLocationLoading(true);
-    setLocationCaptured(false);
-
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const latitude =
-          position.coords.latitude.toFixed(6);
-
-        const longitude =
-          position.coords.longitude.toFixed(6);
-
-        // IMPORTANT:
-        // GPS ONLY updates latitude/longitude.
-        // City and State remain exactly as entered.
-        setForm((prev) => ({
-          ...prev,
-          latitude,
-          longitude,
-        }));
-
-        setLocationCaptured(true);
-        setLocationLoading(false);
-      },
-
-      (locationError) => {
-        setLocationLoading(false);
-
-        if (
-          locationError.code ===
-          locationError.PERMISSION_DENIED
-        ) {
-          setError(
-            "Location permission was denied. Please allow location access and try again."
-          );
-        } else if (
-          locationError.code ===
-          locationError.POSITION_UNAVAILABLE
-        ) {
-          setError(
-            "Your current location could not be detected."
-          );
-        } else if (
-          locationError.code ===
-          locationError.TIMEOUT
-        ) {
-          setError(
-            "Location request timed out. Please try again."
-          );
-        } else {
-          setError(
-            "Unable to detect your current location."
-          );
-        }
-      },
-
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 0,
-      }
+      p=>{setForm(v=>({...v,latitude:p.coords.latitude.toFixed(6),longitude:p.coords.longitude.toFixed(6)}));setLocationCaptured(true);setLocationLoading(false)},
+      ()=>{setLocationLoading(false);setError("Location permission was not granted. You can continue without GPS.")},
+      {enableHighAccuracy:true,timeout:15000,maximumAge:0}
     );
   };
 
-  // ==========================================
-  // REGISTER
-  // ==========================================
-
-  const handleRegister = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
-    e.preventDefault();
-
+  const validate=(s:number)=>{
     setError("");
-
-    if (!form.name.trim()) {
-      setError("Please enter your full name.");
-      return;
+    if(s===1){
+      if(!form.name.trim()||!form.email.trim()||!form.phone.trim()){setError("Complete your name, email and phone number.");return false}
+      if(!/^[6-9]\d{9}$/.test(form.phone)){setError("Please enter a valid 10-digit Indian mobile number.");return false}
+      if(form.password.length<6){setError("Password must be at least 6 characters.");return false}
+      if(form.password!==form.confirmPassword){setError("Passwords do not match.");return false}
+      if(role==="DONOR"&&!form.bloodGroup){setError("Select your blood group to continue.");return false}
     }
-
-    if (!form.email.trim()) {
-      setError("Please enter your email address.");
-      return;
+    if(s===2){
+      if(!form.city.trim()||!form.state){setError("City and state are required.");return false}
+      if(role!=="DONOR"&&(!form.address.trim()||!/^\d{6}$/.test(form.pincode))){setError("Complete the organization address and 6-digit pincode.");return false}
     }
-
-    if (form.password.length < 6) {
-      setError(
-        "Password must be at least 6 characters."
-      );
-      return;
+    if(s===3&&role==="HOSPITAL"&&(!form.hfrId.trim()||!form.registrationNumber.trim()||!file)){
+      setError("HFR ID, registration number and registration document are required.");return false
     }
-
-    if (
-      form.password !==
-      form.confirmPassword
-    ) {
-      setError("Passwords do not match.");
-      return;
+    if(s===3&&role==="BLOOD_BANK"&&(!form.licenseNumber.trim()||!file)){
+      setError("Licence number and licence document are required.");return false
     }
-
-    if (!/^[6-9]\d{9}$/.test(form.phone)) {
-      setError(
-        "Please enter a valid 10-digit Indian phone number."
-      );
-      return;
-    }
-
-    if (role === "DONOR") {
-      if (!form.city.trim()) {
-        setError("Please enter your city.");
-        return;
-      }
-
-      if (!form.state.trim()) {
-        setError("Please enter your state.");
-        return;
-      }
-    }
-
-    try {
-      setLoading(true);
-
-      let payload: Record<string, unknown>;
-
-      // ========================================
-      // DONOR
-      // ========================================
-
-      if (role === "DONOR") {
-        payload = {
-          name: form.name.trim(),
-
-          email: form.email
-            .trim()
-            .toLowerCase(),
-
-          phone: form.phone.trim(),
-
-          password: form.password,
-
-          bloodGroup:
-            form.bloodGroup || "UNKNOWN",
-
-          // MANUAL PROFILE LOCATION
-          city: form.city.trim(),
-
-          state: form.state.trim(),
-
-          // LIVE LOCATION
-          // Only send if user captured it.
-          ...(form.latitude &&
-          form.longitude
-            ? {
-                latitude:
-                  Number(form.latitude),
-                longitude:
-                  Number(form.longitude),
-              }
-            : {}),
-        };
-      } else {
-        payload = {
-          name: form.name.trim(),
-
-          email: form.email
-            .trim()
-            .toLowerCase(),
-
-          phone: form.phone.trim(),
-
-          password: form.password,
-
-          role,
-        };
-      }
-
-      // ========================================
-      // CORRECT API ENDPOINT
-      // ========================================
-
-      const endpoint =
-        role === "DONOR"
-          ? `${API}/api/auth/register/donor`
-          : `${API}/api/auth/register`;
-
-      const response = await fetch(
-        endpoint,
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-
-          body: JSON.stringify(payload),
-        }
-      );
-
-      const data =
-        await response.json();
-
-      if (!response.ok) {
-        if (
-          Array.isArray(data.errors)
-        ) {
-          setError(
-            data.errors.join(" ")
-          );
-        } else {
-          setError(
-            data.message ||
-              "Registration failed."
-          );
-        }
-
-        return;
-      }
-
-      // ========================================
-      // SAVE VERIFICATION EMAIL
-      // ========================================
-
-      const verificationEmail =
-        form.email
-          .trim()
-          .toLowerCase();
-
-      sessionStorage.setItem(
-        "bloodlink_verification_email",
-        verificationEmail
-      );
-
-      sessionStorage.setItem(
-        "bloodlink_verification_role",
-        role
-      );
-
-      // ========================================
-      // GO TO VERIFY EMAIL
-      // ========================================
-
-      router.push(
-        `/verify-email?email=${encodeURIComponent(
-          verificationEmail
-        )}`
-      );
-    } catch (err) {
-      console.error(
-        "Registration error:",
-        err
-      );
-
-      setError(
-        "Unable to connect to BloodLink AI server. Please make sure the backend is running."
-      );
-    } finally {
-      setLoading(false);
-    }
+    return true;
   };
 
-  return (
-    <main className="relative min-h-screen overflow-hidden bg-[#fff7fa] text-slate-900">
+  const next=()=>{if(validate(step))setStep(v=>Math.min(totalSteps,v+1))};
 
-      {/* 3D BACKGROUND */}
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <BloodCells3D />
-      </div>
+  const submit=async(e:React.FormEvent)=>{
+    e.preventDefault();setError("");
+    for(let s=1;s<=totalSteps;s++){if(!validate(s)){setStep(s);return}}
+    try{
+      setLoading(true);
+      let response:Response;
+      if(role==="DONOR"){
+        const payload:any={
+          name:form.name.trim(),email:form.email.trim().toLowerCase(),phone:form.phone.trim(),
+          password:form.password,bloodGroup:form.bloodGroup,city:form.city.trim(),state:form.state,
+          ...(form.latitude&&form.longitude?{latitude:Number(form.latitude),longitude:Number(form.longitude)}:{})
+        };
+        response=await fetch(`${API}/api/auth/register/donor`,{
+          method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)
+        });
+      }else{
+        const fd=new FormData();
+        ["name","email","phone","password"].forEach(k=>fd.append(k,(form as any)[k]));
+        fd.append("role",role);
+        ["address","city","state","pincode","contactPersonName","contactPersonDesignation","website","numberOfBeds"].forEach(k=>fd.append(k,(form as any)[k]||""));
+        if(role==="HOSPITAL"){
+          ["hfrId","registrationNumber","registrationAuthority","facilityType","ownershipType"].forEach(k=>fd.append(k,(form as any)[k]||""));
+        }else{
+          ["licenseNumber","eraktkoshId","category","firstRegistrationDate","licenseStartDate","licenseEndDate","componentFacility","apheresisFacility","helplineNumber","donorTypes","donationTypes","componentTypes","bagTypes","ttiTypes"].forEach(k=>fd.append(k,(form as any)[k]||""));
+        }
+        fd.append("organizationDocument",file!);
+        response=await fetch(`${API}/api/auth/register`,{method:"POST",body:fd});
+      }
+      const data=await response.json();
+      if(!response.ok){setError(Array.isArray(data.errors)?data.errors.join(" "):data.message||"Registration or verification failed.");return}
+      const email=form.email.trim().toLowerCase();
+      sessionStorage.setItem("bloodlink_verification_email",email);
+      sessionStorage.setItem("bloodlink_verification_role",role);
+      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+    }catch{
+      setError("Unable to connect to BloodLink AI server. Please make sure the backend is running.");
+    }finally{setLoading(false)}
+  };
 
-      {/* BACKGROUND GLOW */}
-      <div className="pointer-events-none fixed inset-0 z-[1]">
-        <div className="absolute left-[8%] top-[10%] h-[420px] w-[420px] rounded-full bg-pink-200/30 blur-[120px]" />
+  const currentRole=roles.find(x=>x.value===role)!;
 
-        <div className="absolute bottom-[5%] right-[8%] h-[420px] w-[420px] rounded-full bg-rose-200/30 blur-[120px]" />
-      </div>
+  return <main className="register-page">
+    <div className="register-bg">
+      <div className="register-grid"/>
+      <div className="register-orb one"/>
+      <div className="register-orb two"/>
+      <BloodCells3D/>
+    </div>
 
-      {/* PAGE */}
-      <div className="relative z-10 flex min-h-screen items-center justify-center px-5 py-10">
+    <nav className="register-nav">
+      <button className="register-brand" type="button" onClick={()=>router.push("/")}>
+        <span className="brand-mark">🩸</span>
+        <span><strong>BloodLink<em>AI</em></strong><small>EMERGENCY INTELLIGENCE NETWORK</small></span>
+      </button>
+      <button className="signin-link" type="button" onClick={()=>router.push("/login")}>Already have an account →</button>
+    </nav>
 
-        <motion.div
-          initial={{
-            opacity: 0,
-            y: 20,
-          }}
-          animate={{
-            opacity: 1,
-            y: 0,
-          }}
-          transition={{
-            duration: 0.55,
-          }}
-          className="w-full max-w-[820px]"
-        >
+    <div className="register-shell">
+      <header className="register-heading">
+        <span className="eyebrow"><Sparkles size={11}/> Intelligent onboarding</span>
+        <h1>Join <em>BloodLink AI</em></h1>
+        <p>Create your secure account for the emergency blood network. Every organization is checked before entering the trusted network.</p>
+      </header>
 
-          {/* HEADER */}
-          <div className="mb-6 text-center">
-
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-rose-200 bg-white/80 text-2xl shadow-lg backdrop-blur-xl">
-              🩸
-            </div>
-
-            <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
-              Join{" "}
-              <span className="bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent">
-                BloodLink AI
-              </span>
-            </h1>
-
-            <p className="mt-2 text-sm text-slate-500 sm:text-base">
-              Create your account and become part
-              of the emergency blood network.
-            </p>
+      <form className="register-card" onSubmit={submit}>
+        <section className="register-section role-section">
+          <div className="section-heading">
+            <span className="step accent-step"><ShieldCheck size={15}/></span>
+            <div><small>01 · ACCESS TYPE</small><h2>Choose your BloodLink role</h2></div>
+            <span className="section-note">Select one account type</span>
           </div>
-
-          {/* CARD */}
-          <div className="rounded-[28px] border border-white/80 bg-white/75 p-5 shadow-[0_25px_80px_rgba(190,24,93,0.12)] backdrop-blur-2xl sm:p-7">
-
-            {/* ROLE */}
-            <div className="mb-7">
-
-              <div className="mb-3 text-sm font-bold text-slate-700">
-                I want to register as
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-3">
-
-                {roles.map((item) => {
-                  const active =
-                    role === item.value;
-
-                  return (
-                    <motion.button
-                      key={item.value}
-                      type="button"
-                      whileHover={{ y: -2 }}
-                      whileTap={{
-                        scale: 0.98,
-                      }}
-                      onClick={() => {
-                        setRole(
-                          item.value
-                        );
-                        setError("");
-                      }}
-                      className={`relative rounded-2xl border p-4 text-left transition-all ${
-                        active
-                          ? "border-rose-300 bg-rose-50 shadow-[0_10px_30px_rgba(244,63,94,0.10)]"
-                          : "border-slate-200 bg-white/60 hover:border-rose-200"
-                      }`}
-                    >
-
-                      {active && (
-                        <div className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-white">
-                          <Check size={12} />
-                        </div>
-                      )}
-
-                      <div className="mb-2 text-2xl">
-                        {item.icon}
-                      </div>
-
-                      <div className="text-sm font-bold">
-                        {item.title}
-                      </div>
-
-                      <div className="mt-1 text-xs leading-5 text-slate-500">
-                        {item.description}
-                      </div>
-
-                    </motion.button>
-                  );
-                })}
-
-              </div>
-            </div>
-
-            {/* ERROR */}
-            {error && (
-              <motion.div
-                initial={{
-                  opacity: 0,
-                  y: -5,
-                }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                }}
-                className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600"
-              >
-                {error}
-              </motion.div>
-            )}
-
-            {/* FORM */}
-            <form
-              onSubmit={handleRegister}
-              className="space-y-5"
-            >
-
-              {/* NAME */}
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-700">
-                  Full Name
-                </label>
-
-                <div className="relative">
-                  <User className="auth-icon" />
-
-                  <input
-                    type="text"
-                    required
-                    value={form.name}
-                    onChange={(e) =>
-                      updateField(
-                        "name",
-                        e.target.value
-                      )
-                    }
-                    placeholder="Enter your full name"
-                    className="auth-form-input"
-                  />
-                </div>
-              </div>
-
-              {/* EMAIL + PHONE */}
-              <div className="grid gap-5 sm:grid-cols-2">
-
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-700">
-                    Email Address
-                  </label>
-
-                  <div className="relative">
-                    <Mail className="auth-icon" />
-
-                    <input
-                      type="email"
-                      required
-                      value={form.email}
-                      onChange={(e) =>
-                        updateField(
-                          "email",
-                          e.target.value
-                        )
-                      }
-                      placeholder="you@example.com"
-                      className="auth-form-input"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-700">
-                    Phone Number
-                  </label>
-
-                  <div className="relative">
-                    <Phone className="auth-icon" />
-
-                    <input
-                      type="tel"
-                      required
-                      maxLength={10}
-                      value={form.phone}
-                      onChange={(e) =>
-                        updateField(
-                          "phone",
-                          e.target.value.replace(
-                            /\D/g,
-                            ""
-                          )
-                        )
-                      }
-                      placeholder="10-digit mobile number"
-                      className="auth-form-input"
-                    />
-                  </div>
-                </div>
-
-              </div>
-
-              {/* DONOR DETAILS */}
-              {role === "DONOR" && (
-                <motion.div
-                  initial={{
-                    opacity: 0,
-                  }}
-                  animate={{
-                    opacity: 1,
-                  }}
-                  className="space-y-5"
-                >
-
-                  <div className="my-6 h-px bg-gradient-to-r from-transparent via-rose-200 to-transparent" />
-
-                  <div>
-                    <div className="text-sm font-bold text-slate-800">
-                      Donor Information
-                    </div>
-
-                    <p className="mt-1 text-xs text-slate-500">
-                      These details help BloodLink AI
-                      identify suitable donors during
-                      emergencies.
-                    </p>
-                  </div>
-
-                  {/* BLOOD GROUP */}
-                  <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
-                      Blood Group
-                    </label>
-
-                    <select
-                      value={form.bloodGroup}
-                      onChange={(e) =>
-                        updateField(
-                          "bloodGroup",
-                          e.target.value
-                        )
-                      }
-                      className="auth-form-select"
-                    >
-                      <option value="">
-                        Select your blood group
-                      </option>
-
-                      {bloodGroups.map(
-                        (group) => (
-                          <option
-                            key={group}
-                            value={group}
-                          >
-                            {group}
-                          </option>
-                        )
-                      )}
-
-                      <option value="UNKNOWN">
-                        I don't know my blood group
-                      </option>
-                    </select>
-                  </div>
-
-                  {/* CITY + STATE */}
-                  <div className="grid gap-5 sm:grid-cols-2">
-
-                    <div>
-                      <label className="mb-2 block text-sm font-semibold text-slate-700">
-                        City
-                      </label>
-
-                      <div className="relative">
-                        <MapPin className="auth-icon" />
-
-                        <input
-                          type="text"
-                          required
-                          value={form.city}
-                          onChange={(e) =>
-                            updateField(
-                              "city",
-                              e.target.value
-                            )
-                          }
-                          placeholder="e.g. Jaipur"
-                          className="auth-form-input"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="mb-2 block text-sm font-semibold text-slate-700">
-                        State
-                      </label>
-
-                      <div className="relative">
-                        <MapPin className="auth-icon" />
-
-                        <input
-                          type="text"
-                          required
-                          value={form.state}
-                          onChange={(e) =>
-                            updateField(
-                              "state",
-                              e.target.value
-                            )
-                          }
-                          placeholder="e.g. Rajasthan"
-                          className="auth-form-input"
-                        />
-                      </div>
-                    </div>
-
-                  </div>
-
-                  {/* CURRENT LOCATION */}
-                  <div className="rounded-2xl border border-rose-100 bg-gradient-to-br from-rose-50/80 to-pink-50/60 p-4">
-
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
-                      <div className="flex items-center gap-3">
-
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm">
-                          <LocateFixed
-                            size={19}
-                            className="text-rose-500"
-                          />
-                        </div>
-
-                        <div>
-                          <div className="text-sm font-bold text-slate-800">
-                            Your current location
-                          </div>
-
-                          <div className="mt-0.5 text-xs text-slate-500">
-                            Used for nearby donor matching
-                          </div>
-                        </div>
-
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={
-                          getCurrentLocation
-                        }
-                        disabled={
-                          locationLoading
-                        }
-                        className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-sm font-bold transition ${
-                          locationCaptured
-                            ? "border border-emerald-200 bg-emerald-50 text-emerald-600"
-                            : "bg-rose-500 text-white shadow-[0_10px_25px_rgba(244,63,94,0.22)] hover:bg-rose-600"
-                        } disabled:cursor-not-allowed disabled:opacity-70`}
-                      >
-
-                        {locationLoading ? (
-                          <>
-                            <Loader2
-                              size={17}
-                              className="animate-spin"
-                            />
-                            Detecting...
-                          </>
-                        ) : locationCaptured ? (
-                          <>
-                            <Check size={17} />
-                            Location Captured
-                          </>
-                        ) : (
-                          <>
-                            <LocateFixed
-                              size={17}
-                            />
-                            Use My Location
-                          </>
-                        )}
-
-                      </button>
-
-                    </div>
-
-                    {locationCaptured && (
-                      <motion.div
-                        initial={{
-                          opacity: 0,
-                          y: 5,
-                        }}
-                        animate={{
-                          opacity: 1,
-                          y: 0,
-                        }}
-                        className="mt-3 rounded-xl bg-white/75 px-3 py-2 text-xs text-emerald-600"
-                      >
-                        ✓ Location captured
-                        successfully. Your exact
-                        coordinates are not displayed
-                        publicly.
-                      </motion.div>
-                    )}
-
-                    <p className="mt-3 text-[11px] leading-4 text-slate-400">
-                      Location access is optional.
-                      It helps BloodLink AI calculate
-                      donor proximity during emergency
-                      matching.
-                    </p>
-
-                  </div>
-
-                </motion.div>
-              )}
-
-              {/* PASSWORDS */}
-              <div className="grid gap-5 sm:grid-cols-2">
-
-                {/* PASSWORD */}
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-700">
-                    Password
-                  </label>
-
-                  <div className="relative">
-
-                    <Lock className="auth-icon" />
-
-                    <input
-                      type={
-                        showPassword
-                          ? "text"
-                          : "password"
-                      }
-                      required
-                      minLength={6}
-                      value={form.password}
-                      onChange={(e) =>
-                        updateField(
-                          "password",
-                          e.target.value
-                        )
-                      }
-                      placeholder="Minimum 6 characters"
-                      className="auth-form-input auth-form-password"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowPassword(
-                          (prev) => !prev
-                        )
-                      }
-                      className="auth-password-toggle"
-                    >
-                      {showPassword ? (
-                        <EyeOff size={18} />
-                      ) : (
-                        <Eye size={18} />
-                      )}
-                    </button>
-
-                  </div>
-                </div>
-
-                {/* CONFIRM */}
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-700">
-                    Confirm Password
-                  </label>
-
-                  <div className="relative">
-
-                    <Lock className="auth-icon" />
-
-                    <input
-                      type={
-                        showConfirmPassword
-                          ? "text"
-                          : "password"
-                      }
-                      required
-                      minLength={6}
-                      value={
-                        form.confirmPassword
-                      }
-                      onChange={(e) =>
-                        updateField(
-                          "confirmPassword",
-                          e.target.value
-                        )
-                      }
-                      placeholder="Repeat your password"
-                      className="auth-form-input auth-form-password"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowConfirmPassword(
-                          (prev) => !prev
-                        )
-                      }
-                      className="auth-password-toggle"
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff size={18} />
-                      ) : (
-                        <Eye size={18} />
-                      )}
-                    </button>
-
-                  </div>
-                </div>
-
-              </div>
-
-              {/* SUBMIT */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="group mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-600 px-5 py-4 text-sm font-bold text-white shadow-[0_15px_35px_rgba(244,63,94,0.25)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-
-                {loading ? (
-                  <>
-                    <Loader2
-                      size={18}
-                      className="animate-spin"
-                    />
-                    Creating Account...
-                  </>
-                ) : (
-                  <>
-                    Create Account
-
-                    <ArrowRight
-                      size={18}
-                      className="transition-transform group-hover:translate-x-1"
-                    />
-                  </>
-                )}
-
-              </button>
-
-            </form>
-
-            {/* LOGIN */}
-            <div className="mt-6 text-center text-sm text-slate-500">
-              Already have an account?{" "}
-
-              <button
-                type="button"
-                onClick={() =>
-                  router.push("/login")
-                }
-                className="font-bold text-rose-500 hover:text-rose-600"
-              >
-                Sign in
-              </button>
-            </div>
-
-            <div className="mt-6 border-t border-slate-100 pt-5 text-center text-[11px] leading-5 text-slate-400">
-              By creating an account, you agree to
-              use BloodLink AI responsibly. Final
-              donor eligibility is determined through
-              appropriate medical screening.
-            </div>
-
+          <div className="role-grid">
+            {roles.map(r=>{
+              const Icon=r.icon,active=r.value===role;
+              return <motion.button key={r.value} type="button" whileTap={{scale:.995}} className={`role-card ${active?"active":""}`} onClick={()=>switchRole(r.value)}>
+                {active&&<span className="role-check"><Check size={12}/></span>}
+                <span className="role-icon"><Icon size={17}/></span>
+                <strong>{r.title}</strong><p>{r.desc}</p><span className="role-status">{r.status}</span>
+              </motion.button>
+            })}
           </div>
-        </motion.div>
-      </div>
-    </main>
-  );
+          <div className="progress-row">
+            {Array.from({length:totalSteps},(_,i)=>i+1).map(n=><div key={n} style={{display:"contents"}}>
+              <span className={`progress-node ${step>=n?"active":""}`}>{step>n?<Check size={12}/>:n}</span>
+              {n<totalSteps&&<span className={`progress-line ${step>n?"done":""}`}/>}
+            </div>)}
+          </div>
+          <div className="progress-labels"><span>ACCOUNT</span><span>{totalSteps===3?"ORGANIZATION":"LOCATION"}</span>{totalSteps===3&&<span>VERIFICATION</span>}</div>
+        </section>
+
+        {error&&<div className="register-error"><AlertCircle size={14} style={{verticalAlign:"-2px",marginRight:7}}/>{error}</div>}
+
+        <AnimatePresence mode="wait">
+          {step===1&&<motion.div key="one" initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-8}}>
+            <section className="register-section">
+              <div className="section-heading"><span className="step accent-step"><User size={15}/></span><div><small>02 · ACCOUNT IDENTITY</small><h2>{role==="DONOR"?"Your personal details":"Authorized account details"}</h2></div></div>
+              <div className="form-grid">
+                <Field label={role==="DONOR"?"Full Name":"Organization Name"} value={form.name} onChange={(v:string)=>set("name",v)} placeholder={role==="DONOR"?"Enter your full name":"Registered organization name"} required icon={User}/>
+                <Field label="Email Address" value={form.email} onChange={(v:string)=>set("email",v)} placeholder="you@example.com" type="email" required icon={Mail}/>
+                <Field label="Phone Number" value={form.phone} onChange={(v:string)=>set("phone",v.replace(/\D/g,"").slice(0,10))} placeholder="10-digit mobile number" type="tel" required icon={Phone}/>
+                {role!=="DONOR"&&<Field label="Authorized Contact Person" value={form.contactPersonName} onChange={(v:string)=>set("contactPersonName",v)} placeholder="Full name" required icon={User}/>}
+              </div>
+            </section>
+
+            <section className="register-section">
+              <div className="section-heading"><span className="step"><Lock size={15}/></span><div><small>03 · SECURITY</small><h2>Secure your account</h2></div></div>
+              <div className="form-grid">
+                <PasswordField label="Password" value={form.password} onChange={(v:string)=>set("password",v)} visible={showPass} setVisible={setShowPass}/>
+                <PasswordField label="Confirm Password" value={form.confirmPassword} onChange={(v:string)=>set("confirmPassword",v)} visible={showConfirm} setVisible={setShowConfirm}/>
+              </div>
+            </section>
+
+            {role==="DONOR"&&<section className="register-section donor-section">
+              <div className="section-heading"><span className="step accent-step"><ShieldCheck size={15}/></span><div><small>04 · DONOR PROFILE</small><h2>Matching profile</h2></div></div>
+              <div className="form-grid">
+                <SelectBox label="Blood Group" value={form.bloodGroup} options={bloodGroups} onChange={(v:string)=>set("bloodGroup",v)} placeholder="Select blood group" required/>
+                <Field label="Contact Designation" value={form.contactPersonDesignation} onChange={(v:string)=>set("contactPersonDesignation",v)} placeholder="Optional"/>
+              </div>
+            </section>}
+          </motion.div>}
+
+          {step===2&&<motion.div key="two" initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-8}}>
+            <section className="register-section">
+              <div className="section-heading"><span className="step accent-step"><MapPin size={15}/></span><div><small>02 · LOCATION</small><h2>{role==="DONOR"?"Your location":"Registered facility location"}</h2></div></div>
+              {role!=="DONOR"&&<div className="form-grid" style={{marginBottom:15}}><Field label="Complete Address" value={form.address} onChange={(v:string)=>set("address",v)} placeholder="Street, area, landmark" required icon={MapPin}/><div/> </div>}
+              <div className="form-grid">
+                <Field label="City" value={form.city} onChange={(v:string)=>set("city",v)} placeholder="Jaipur" required/>
+                <SelectBox label="State" value={form.state} options={states} onChange={(v:string)=>set("state",v)} placeholder="Select state" required/>
+                {role!=="DONOR"&&<Field label="Pincode" value={form.pincode} onChange={(v:string)=>set("pincode",v.replace(/\D/g,"").slice(0,6))} placeholder="302001" required/>}
+              </div>
+              <div className="location-panel">
+                <div className="location-copy"><LocateFixed size={17}/><span>{locationCaptured?"GPS coordinates captured and ready for location-aware matching.":"Capture your current coordinates for smarter emergency matching."}</span></div>
+                <button type="button" className="location-btn" onClick={getLocation}>{locationLoading?<Loader2 size={13} className="spin"/>:<LocateFixed size={13}/>} {locationCaptured?"GPS captured":"Capture GPS"}</button>
+              </div>
+            </section>
+
+            {role!=="DONOR"&&<section className="register-section">
+              <div className="section-heading"><span className="step"><Building2 size={15}/></span><div><small>03 · FACILITY PROFILE</small><h2>Official organization information</h2></div></div>
+              <div className="form-grid">
+                {role==="HOSPITAL"?<>
+                  <Field label="Registration Authority" value={form.registrationAuthority} onChange={(v:string)=>set("registrationAuthority",v)} placeholder="ABDM HFR / State authority"/>
+                  <SelectBox label="Facility Type" value={form.facilityType} options={facilityTypes} onChange={(v:string)=>set("facilityType",v)} placeholder="Select facility type"/>
+                  <SelectBox label="Ownership Type" value={form.ownershipType} options={ownershipTypes} onChange={(v:string)=>set("ownershipType",v)} placeholder="Select ownership"/>
+                  <Field label="Number of Beds" value={form.numberOfBeds} onChange={(v:string)=>set("numberOfBeds",v.replace(/\D/g,""))} placeholder="e.g. 250"/>
+                  <Field label="Official Website" value={form.website} onChange={(v:string)=>set("website",v)} placeholder="https://example.com"/>
+                  <Field label="Contact Designation" value={form.contactPersonDesignation} onChange={(v:string)=>set("contactPersonDesignation",v)} placeholder="Medical Superintendent"/>
+                </>:<>
+                  <SelectBox label="Blood Bank Category" value={form.category} options={bankCategories} onChange={(v:string)=>set("category",v)} placeholder="Select category"/>
+                  <Field label="Official Website" value={form.website} onChange={(v:string)=>set("website",v)} placeholder="https://example.com"/>
+                  <Field label="Contact Designation" value={form.contactPersonDesignation} onChange={(v:string)=>set("contactPersonDesignation",v)} placeholder="Authorized Representative" required/>
+                  <Field label="Helpline Number" value={form.helplineNumber} onChange={(v:string)=>set("helplineNumber",v)} placeholder="Blood bank helpline"/>
+                  <Field label="Number of Beds" value={form.numberOfBeds} onChange={(v:string)=>set("numberOfBeds",v.replace(/\D/g,""))} placeholder="e.g. 100"/>
+                </>}
+              </div>
+            </section>}
+          </motion.div>}
+
+          {step===3&&role!=="DONOR"&&<motion.div key="three" initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-8}}>
+            <section className="register-section">
+              <div className="section-heading"><span className="step accent-step"><FileCheck2 size={15}/></span><div><small>03 · INDEPENDENT CHECK</small><h2>{role==="HOSPITAL"?"Hospital verification":"Blood-bank verification"}</h2></div><span className="section-note">Verification-first onboarding</span></div>
+              <div className="form-grid">
+                {role==="HOSPITAL"?<>
+                  <Field label="ABDM HFR ID" value={form.hfrId} onChange={(v:string)=>set("hfrId",v)} placeholder="e.g. IN9912345678" required/>
+                  <Field label="Registration Number" value={form.registrationNumber} onChange={(v:string)=>set("registrationNumber",v)} placeholder="Official registration number" required/>
+                </>:<>
+                  <Field label="Licence Number" value={form.licenseNumber} onChange={(v:string)=>set("licenseNumber",v)} placeholder="Official blood-bank licence" required/>
+                  <Field label="e-RaktKosh ID" value={form.eraktkoshId} onChange={(v:string)=>set("eraktkoshId",v)} placeholder="If already assigned"/>
+                  <Field label="First Registration Date" value={form.firstRegistrationDate} onChange={(v:string)=>set("firstRegistrationDate",v)} type="date"/>
+                  <Field label="Licence From" value={form.licenseStartDate} onChange={(v:string)=>set("licenseStartDate",v)} type="date"/>
+                  <Field label="Licence To" value={form.licenseEndDate} onChange={(v:string)=>set("licenseEndDate",v)} type="date"/>
+                </>}
+              </div>
+            </section>
+
+            {role==="BLOOD_BANK"&&<section className="register-section">
+              <div className="section-heading"><span className="step"><Landmark size={15}/></span><div><small>04 · BLOOD CENTRE PROFILE</small><h2>Advanced capabilities</h2></div></div>
+              <div className="form-grid">
+                <Field label="Donor Types" value={form.donorTypes} onChange={(v:string)=>set("donorTypes",v)} placeholder="Voluntary, replacement..."/>
+                <Field label="Donation Types" value={form.donationTypes} onChange={(v:string)=>set("donationTypes",v)} placeholder="Whole blood, apheresis..."/>
+                <Field label="Component Types" value={form.componentTypes} onChange={(v:string)=>set("componentTypes",v)} placeholder="PRBC, FFP, platelets..."/>
+                <Field label="Bag Types" value={form.bagTypes} onChange={(v:string)=>set("bagTypes",v)} placeholder="Single, double, triple..."/>
+                <Field label="TTI Types" value={form.ttiTypes} onChange={(v:string)=>set("ttiTypes",v)} placeholder="HBsAg, HCV, HIV..."/>
+                <Field label="Component Facility" value={form.componentFacility} onChange={(v:string)=>set("componentFacility",v)} placeholder="Available / Not available"/>
+                <Field label="Apheresis Facility" value={form.apheresisFacility} onChange={(v:string)=>set("apheresisFacility",v)} placeholder="Available / Not available"/>
+              </div>
+            </section>}
+
+            <section className="register-section">
+              <div className="verification-box">
+                <div className="verification-head">
+                  <span className="verification-icon"><FileText size={17}/></span>
+                  <div><h3>{role==="HOSPITAL"?"Hospital registration certificate":"Blood-bank licence document"}</h3><p>Upload the official document. BloodLink fingerprints the file and checks it against the configured trusted verification source.</p></div>
+                </div>
+                <input ref={fileRef} type="file" accept=".pdf,.jpg,.jpeg,.png" hidden onChange={e=>setFile(e.target.files?.[0]||null)}/>
+                {!file?<button type="button" className="upload-box" onClick={()=>fileRef.current?.click()}>
+                  <span><span className="upload-icon"><Upload size={17}/></span><b style={{display:"block",fontSize:10}}>Upload verification document</b><small style={{display:"block",marginTop:4,color:"#a38d96",fontSize:8}}>PDF, JPG or PNG · Clear official copy</small></span>
+                </button>:<div className="file-ready">
+                  <FileCheck2 size={18} style={{color:"#188052",flex:"0 0 auto"}}/>
+                  <div style={{minWidth:0,flex:1}}><div className="file-name">{file.name}</div><div className="file-meta">{(file.size/1024/1024).toFixed(2)} MB · Ready for verification</div></div>
+                  <button type="button" onClick={()=>setFile(null)} style={{border:0,background:"transparent",color:"#8d7780",cursor:"pointer"}}><X size={15}/></button>
+                </div>}
+              </div>
+            </section>
+          </motion.div>}
+        </AnimatePresence>
+
+        <div className="security-strip">
+          <div className="security-item"><ShieldCheck size={15}/><span><b>Verification-first</b><br/>Organizations are checked before approval.</span></div>
+          <div className="security-item"><Lock size={15}/><span><b>Secure onboarding</b><br/>Credentials and documents travel over your API.</span></div>
+          <div className="security-item"><FileCheck2 size={15}/><span><b>Audit-ready</b><br/>Verification status is stored with the profile.</span></div>
+        </div>
+
+        <div className="submit-row">
+          <div className="privacy-note"><ShieldCheck size={14}/><span>Your information is submitted securely to the BloodLink AI backend. Organization approval depends on independent verification.</span></div>
+          <div className="step-actions">
+            {step>1&&<button type="button" className="back-step-btn" onClick={()=>{setError("");setStep(v=>Math.max(1,v-1))}}><ChevronLeft size={15}/> Back</button>}
+            {step<totalSteps?
+              <button type="button" className="create-btn" onClick={next}>Continue <ChevronRight size={15}/></button>:
+              <button type="submit" className="create-btn" disabled={loading}>{loading?<><Loader2 size={15} className="spin"/> Verifying...</>:<>Create verified account <ArrowRight size={15}/></>}</button>}
+          </div>
+        </div>
+        <div className="login-footer">Already registered? <button type="button" onClick={()=>router.push("/login")}>Back to login →</button></div>
+      </form>
+    </div>
+
+    <footer className="register-footer">
+      <span>© 2026 BloodLink AI</span>
+      <span><i className="live-dot"/> Network operational</span>
+      <span>Emergency intelligence platform</span>
+    </footer>
+  </main>
 }
