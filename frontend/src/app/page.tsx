@@ -10,7 +10,7 @@ export default function Home() {
     <div className="min-h-screen bg-[#FCFAF8] text-neutral-800 font-sans selection:bg-red-200">
       {/* Top Notification Bar */}
       <div className="w-full bg-red-700 text-white text-sm py-2 px-4 text-center font-medium">
-        🚨 Urgent: Type O- and AB- blood types are currently in critical shortage in the metropolitan area. <Link href="/request-blood" className="underline hover:text-red-200">Donate today.</Link>
+        🚨 Urgent: Type O- and AB- blood types are currently in critical shortage in Delhi NCR. <Link href="/request-blood" className="underline hover:text-red-200">Donate today.</Link>
       </div>
 
       {/* Navigation */}
@@ -26,10 +26,10 @@ export default function Home() {
             </div>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-bold text-neutral-600">
+            <Link href="/guide" className="hover:text-red-600 transition-colors">Platform Guide</Link>
             <Link href="#urgent-appeals" className="hover:text-red-600 transition-colors">Urgent Appeals</Link>
             <Link href="#how-it-works" className="hover:text-red-600 transition-colors">How it Works</Link>
             <Link href="#our-impact" className="hover:text-red-600 transition-colors">Our Impact</Link>
-            <Link href="#stories" className="hover:text-red-600 transition-colors">Real Stories</Link>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/login" className="text-sm font-bold text-neutral-900 hover:text-red-600 transition-colors hidden sm:block">
@@ -100,11 +100,11 @@ export default function Home() {
                 <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600 font-black text-lg">A+</div>
                 <div>
                   <p className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Match Found</p>
-                  <p className="text-sm font-bold text-neutral-900">City General Hospital</p>
+                  <p className="text-sm font-bold text-neutral-900">AIIMS Trauma Centre</p>
                 </div>
               </div>
               <div className="text-xs text-neutral-500 font-medium flex items-center gap-1">
-                <Clock className="w-3 h-3" /> Donor is 5 mins away
+                <Clock className="w-3 h-3" /> Donor is 10 mins away
               </div>
             </div>
           </div>
@@ -124,9 +124,9 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <AppealCard name="Baby Emma" hospital="St. Jude Children's" type="O-" time="2 hours ago" urgent={true} />
-              <AppealCard name="Mr. Robert Davis" hospital="Metro General Surgery" type="AB+" time="5 hours ago" urgent={false} />
-              <AppealCard name="Emergency Trauma" hospital="City Center Hospital" type="A+" time="Just now" urgent={true} />
+              <AppealCard name="Aarohi Verma" hospital="Tata Memorial Hospital" type="O-" time="2 hours ago" urgent={true} />
+              <AppealCard name="Mr. Rajesh Kumar" hospital="Apollo Hospitals" type="AB+" time="5 hours ago" urgent={false} />
+              <AppealCard name="Emergency Trauma" hospital="Fortis Escorts" type="A+" time="Just now" urgent={true} />
             </div>
           </div>
         </section>
@@ -155,7 +155,7 @@ export default function Home() {
                 <MapPin className="w-10 h-10" />
               </div>
               <h3 className="text-2xl font-bold text-neutral-900 mb-3">2. Local Matching</h3>
-              <p className="text-neutral-600 font-medium leading-relaxed">Our system instantly pings registered, eligible donors who are currently within a 10-mile radius.</p>
+              <p className="text-neutral-600 font-medium leading-relaxed">Our system instantly pings registered, eligible donors who are currently within a 15-km radius.</p>
             </div>
 
             <div className="flex flex-col items-center text-center">
@@ -164,6 +164,93 @@ export default function Home() {
               </div>
               <h3 className="text-2xl font-bold text-neutral-900 mb-3">3. Life is Saved</h3>
               <p className="text-neutral-600 font-medium leading-relaxed">A donor accepts the ping, heads to the hospital, and provides the life-saving blood exactly when needed.</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Our Impact Section (New) */}
+        <section id="our-impact" className="py-24 px-6 bg-white border-t border-neutral-100">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <h2 className="text-4xl font-black text-neutral-900 mb-4">The Power of Community</h2>
+              <p className="text-lg text-neutral-600 font-medium">When neighbors show up for neighbors, the numbers speak for themselves. Here is the real-world impact of the BloodBond network this year.</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-red-50 p-8 rounded-3xl border border-red-100 text-center">
+                <div className="text-5xl font-black text-red-600 mb-2">42K+</div>
+                <div className="text-sm font-bold text-neutral-900 uppercase tracking-wider">Lives Saved</div>
+              </div>
+              <div className="bg-blue-50 p-8 rounded-3xl border border-blue-100 text-center">
+                <div className="text-5xl font-black text-blue-600 mb-2">18.5K</div>
+                <div className="text-sm font-bold text-neutral-900 uppercase tracking-wider">Active Donors</div>
+              </div>
+              <div className="bg-emerald-50 p-8 rounded-3xl border border-emerald-100 text-center">
+                <div className="text-5xl font-black text-emerald-600 mb-2">124</div>
+                <div className="text-sm font-bold text-neutral-900 uppercase tracking-wider">Partner Hospitals</div>
+              </div>
+              <div className="bg-amber-50 p-8 rounded-3xl border border-amber-100 text-center">
+                <div className="text-5xl font-black text-amber-600 mb-2">11m</div>
+                <div className="text-sm font-bold text-neutral-900 uppercase tracking-wider">Avg. Response Time</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Unique Features */}
+        <section className="py-24 px-6 max-w-7xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-4xl font-black text-neutral-900 mb-4">More than just a database.</h2>
+            <p className="text-lg text-neutral-600 font-medium">We have engineered completely unique features to remove every possible barrier to blood donation.</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-red-50 p-10 rounded-3xl border border-red-100 flex flex-col items-start gap-6 hover:shadow-xl hover:shadow-red-900/5 transition-all">
+              <div className="w-16 h-16 bg-red-600 text-white rounded-2xl flex items-center justify-center shadow-lg">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+              </div>
+              <div>
+                <h3 className="text-2xl font-black text-neutral-900 mb-2">Live Blood Journey</h3>
+                <p className="text-neutral-600 font-medium leading-relaxed">
+                  Track your donation just like a package. Get notified exactly when your blood finishes testing, leaves the bank, and is successfully transfused into a patient.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 p-10 rounded-3xl border border-blue-100 flex flex-col items-start gap-6 hover:shadow-xl hover:shadow-blue-900/5 transition-all">
+              <div className="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+              </div>
+              <div>
+                <h3 className="text-2xl font-black text-neutral-900 mb-2">Emergency Ride-Share</h3>
+                <p className="text-neutral-600 font-medium leading-relaxed">
+                  Want to donate but don't have a car? We instantly partner you with verified local volunteer drivers who will pick you up and drop you at the hospital for free.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-emerald-50 p-10 rounded-3xl border border-emerald-100 flex flex-col items-start gap-6 hover:shadow-xl hover:shadow-emerald-900/5 transition-all">
+              <div className="w-16 h-16 bg-emerald-600 text-white rounded-2xl flex items-center justify-center shadow-lg">
+                <ShieldCheck className="w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-black text-neutral-900 mb-2">Verified Donor Badges</h3>
+                <p className="text-neutral-600 font-medium leading-relaxed">
+                  Earn verifiable digital badges for your donations. Connect your BloodBond profile to LinkedIn to showcase your community service and rare blood type hero status.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-purple-50 p-10 rounded-3xl border border-purple-100 flex flex-col items-start gap-6 hover:shadow-xl hover:shadow-purple-900/5 transition-all">
+              <div className="w-16 h-16 bg-purple-600 text-white rounded-2xl flex items-center justify-center shadow-lg">
+                <Activity className="w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-black text-neutral-900 mb-2">Live Inventory Integration</h3>
+                <p className="text-neutral-600 font-medium leading-relaxed">
+                  Unlike generic platforms, BloodBond hooks directly into hospital blood bank software. Alerts are only sent if the hospital's fridge physically runs out of your specific blood type.
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -195,20 +282,39 @@ export default function Home() {
           </div>
         </section>
 
+        {/* FAQ Section */}
+        <section className="py-24 px-6 max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-black text-neutral-900 mb-4">Common Questions</h2>
+          </div>
+          <div className="space-y-4">
+            {[
+              { q: "Does BloodBond share my personal location?", a: "No. We only use your general zip code to match you with nearby hospitals. When an emergency happens, we send you the hospital's location. Your personal address is never shared with patients." },
+              { q: "What if I am matched but can't donate right now?", a: "That's completely fine! You can simply click 'Decline' on the alert, and our system will immediately notify the next closest eligible donor." },
+              { q: "How often can I donate blood?", a: "According to health guidelines, you must wait 56 days between whole blood donations. BloodBond automatically tracks this and will pause your alerts during your recovery period." }
+            ].map((faq, i) => (
+              <div key={i} className="bg-white p-6 rounded-2xl border border-neutral-200">
+                <h4 className="font-bold text-lg text-neutral-900 mb-2">{faq.q}</h4>
+                <p className="text-neutral-600 font-medium">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* CTA */}
-        <section className="py-32 px-6">
+        <section className="py-24 px-6 bg-[#FCFAF8] border-t border-neutral-100">
           <div className="max-w-4xl mx-auto text-center space-y-10">
             <h2 className="text-5xl md:text-6xl font-black text-neutral-900 tracking-tight">The community needs you.</h2>
             <p className="text-xl text-neutral-600 font-medium max-w-2xl mx-auto">
               It takes 2 minutes to register. We will only contact you when someone in your immediate area faces a critical emergency.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <button className="px-10 py-5 rounded-2xl bg-red-600 text-white font-black text-lg hover:bg-red-700 transition-transform hover:scale-105 shadow-xl shadow-red-600/20">
+              <Link href="/login" className="px-10 py-5 rounded-2xl bg-red-600 text-white font-black text-lg hover:bg-red-700 transition-transform hover:scale-105 shadow-xl shadow-red-600/20">
                 Register as a Donor
-              </button>
-              <button className="px-10 py-5 rounded-2xl bg-white border-2 border-neutral-200 text-neutral-900 font-black text-lg hover:bg-neutral-50 transition-colors">
-                Learn More
-              </button>
+              </Link>
+              <Link href="/guide" className="px-10 py-5 rounded-2xl bg-white border-2 border-neutral-200 text-neutral-900 font-black text-lg hover:bg-neutral-50 transition-colors">
+                Read the Guide
+              </Link>
             </div>
           </div>
         </section>

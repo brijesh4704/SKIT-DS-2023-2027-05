@@ -38,7 +38,7 @@ export default function Login() {
             Join the network.<br/>Save a life.
           </h2>
           <p className="text-red-100 font-medium text-lg leading-relaxed">
-            Every 2 seconds, someone in the US needs blood. By registering, you become part of a local safety net that protects your community.
+            Every 2 seconds, someone in India needs blood. By registering, you become part of a local safety net that protects your community.
           </p>
         </div>
       </div>
@@ -70,7 +70,7 @@ export default function Login() {
                 <div className="relative">
                   <input 
                     type="text" 
-                    placeholder="Sarah Jenkins" 
+                    placeholder="Priya Sharma" 
                     className="w-full h-14 bg-white border-2 border-neutral-200 rounded-xl px-4 pl-12 text-neutral-900 font-medium placeholder-neutral-400 focus:outline-none focus:border-red-600 focus:ring-4 focus:ring-red-600/10 transition-all shadow-sm"
                   />
                   <User className="w-5 h-5 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2" />
@@ -83,7 +83,7 @@ export default function Login() {
               <div className="relative">
                 <input 
                   type="email" 
-                  placeholder="sarah@example.com" 
+                  placeholder="priya@example.com" 
                   className="w-full h-14 bg-white border-2 border-neutral-200 rounded-xl px-4 pl-12 text-neutral-900 font-medium placeholder-neutral-400 focus:outline-none focus:border-red-600 focus:ring-4 focus:ring-red-600/10 transition-all shadow-sm"
                 />
                 <Mail className="w-5 h-5 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2" />

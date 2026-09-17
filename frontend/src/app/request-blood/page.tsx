@@ -51,14 +51,14 @@ export default function RequestBlood() {
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-neutral-900 uppercase tracking-wide">Patient's Full Name</label>
                     <div className="relative">
-                      <input type="text" className="w-full h-14 bg-neutral-50 border-2 border-neutral-200 rounded-xl px-4 pl-12 text-neutral-900 font-medium placeholder-neutral-400 focus:border-red-600 focus:ring-4 focus:ring-red-600/10 transition-all outline-none" placeholder="Jane Doe" />
+                      <input type="text" className="w-full h-14 bg-neutral-50 border-2 border-neutral-200 rounded-xl px-4 pl-12 text-neutral-900 font-medium placeholder-neutral-400 focus:border-red-600 focus:ring-4 focus:ring-red-600/10 transition-all outline-none" placeholder="Priya Sharma" />
                       <User className="w-5 h-5 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2" />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-neutral-900 uppercase tracking-wide">Contact Number</label>
                     <div className="relative">
-                      <input type="tel" className="w-full h-14 bg-neutral-50 border-2 border-neutral-200 rounded-xl px-4 pl-12 text-neutral-900 font-medium placeholder-neutral-400 focus:border-red-600 focus:ring-4 focus:ring-red-600/10 transition-all outline-none" placeholder="(555) 000-0000" />
+                      <input type="tel" className="w-full h-14 bg-neutral-50 border-2 border-neutral-200 rounded-xl px-4 pl-12 text-neutral-900 font-medium placeholder-neutral-400 focus:border-red-600 focus:ring-4 focus:ring-red-600/10 transition-all outline-none" placeholder="+91 98765 43210" />
                       <Phone className="w-5 h-5 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2" />
                     </div>
                   </div>
@@ -105,7 +105,7 @@ export default function RequestBlood() {
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-neutral-900 uppercase tracking-wide">Hospital / Clinic Name</label>
                   <div className="relative">
-                    <input type="text" className="w-full h-14 bg-neutral-50 border-2 border-neutral-200 rounded-xl px-4 pl-12 text-neutral-900 font-medium placeholder-neutral-400 focus:border-red-600 focus:ring-4 focus:ring-red-600/10 transition-all outline-none" placeholder="City General Hospital" />
+                    <input type="text" className="w-full h-14 bg-neutral-50 border-2 border-neutral-200 rounded-xl px-4 pl-12 text-neutral-900 font-medium placeholder-neutral-400 focus:border-red-600 focus:ring-4 focus:ring-red-600/10 transition-all outline-none" placeholder="AIIMS Trauma Centre" />
                     <Activity className="w-5 h-5 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2" />
                   </div>
                 </div>
@@ -113,7 +113,7 @@ export default function RequestBlood() {
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-neutral-900 uppercase tracking-wide">Full Address & Ward Info</label>
                   <div className="relative">
-                    <textarea className="w-full h-32 bg-neutral-50 border-2 border-neutral-200 rounded-xl p-4 pl-12 text-neutral-900 font-medium placeholder-neutral-400 focus:border-red-600 focus:ring-4 focus:ring-red-600/10 transition-all outline-none resize-none" placeholder="123 Medical Drive, Ward 4B..." />
+                    <textarea className="w-full h-32 bg-neutral-50 border-2 border-neutral-200 rounded-xl p-4 pl-12 text-neutral-900 font-medium placeholder-neutral-400 focus:border-red-600 focus:ring-4 focus:ring-red-600/10 transition-all outline-none resize-none" placeholder="Ring Road, Ansari Nagar, Ward 4B..." />
                     <MapPin className="w-5 h-5 text-neutral-400 absolute left-4 top-5" />
                   </div>
                 </div>
