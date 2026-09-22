@@ -42,6 +42,24 @@ const protect = async (req, res, next) => {
       });
     }
 
+    // In production, organization accounts must have passed
+    // independent organization verification before protected
+    // hospital/blood-bank functionality is exposed. This is
+    // opt-in so existing local development accounts are not
+    // unexpectedly locked during migration.
+    if (
+      process.env.ENFORCE_ORG_VERIFICATION === "true" &&
+      ["HOSPITAL", "BLOOD_BANK"].includes(user.role) &&
+      !user.organizationVerified
+    ) {
+      return res.status(403).json({
+        success: false,
+        code: "ORGANIZATION_NOT_VERIFIED",
+        message:
+          "This organization account has not passed independent verification.",
+      });
+    }
+
     req.user = user;
 
     next();
