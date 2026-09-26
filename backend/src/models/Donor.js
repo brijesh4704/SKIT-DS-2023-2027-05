@@ -12,7 +12,7 @@ const donorSchema = new mongoose.Schema(
     bloodGroup: {
       type: String,
       required: true,
-      enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
+      enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-","UNKNOWN"],
     },
 
     dateOfBirth: {
@@ -105,7 +105,7 @@ const donorSchema = new mongoose.Schema(
 
     medicalEligible: {
       type: Boolean,
-      default: true,
+      default: false,
     },
 
     emergencyAvailable: {
