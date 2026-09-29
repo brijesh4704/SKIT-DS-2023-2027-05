@@ -1,0 +1,70 @@
+/* =========================================================
+   BLOODLINK DONOR — ONE GLOBAL SHELL
+   Removes legacy per-page chrome and normalizes hero spacing.
+   ========================================================= */
+
+.bl-donor-content{min-height:0!important}
+
+/* Overview legacy shell */
+.donor-dashboard .dashboard-sidebar,
+.donor-dashboard .mobile-menu-button{display:none!important}
+.donor-dashboard .dashboard-main{margin-left:0!important;padding:18px 0 0!important;min-height:0!important}
+.donor-dashboard .dashboard-header{display:none!important}
+.donor-dashboard .dashboard-footer{display:none!important}
+.donor-dashboard .command-center{min-height:520px!important;margin:0 0 18px!important;padding:34px 42px!important}
+
+/* Legacy page navigation bars */
+.ai-page>.shell>.topbar,
+.ai-page>.shell>.network-nav,
+.donation-page .donor-nav,
+.availability-page .nav,
+.emergency-page .nav,
+.requests-page .requests-topbar,
+.profile-page .donor-nav,
+.settings-page .settings-topbar{display:none!important}
+
+/* Legacy page footers — shared DonorChrome footer replaces them */
+.ai-page .premium-footer,
+.donation-page .donor-footer,
+.availability-page .footer,
+.emergency-page .footer,
+.requests-page .request-footer,
+.requests-page .site-footer,
+.profile-page .site-footer,
+.settings-page .site-footer{display:none!important}
+
+/* Legacy sidebars */
+.availability-page aside,
+.emergency-page aside,
+.donation-page .ledger-side,
+.profile-page .side-column,
+.settings-page aside{display:none!important}
+
+/* Normalize page content to the same navbar-to-hero rhythm */
+.ai-page .shell,
+.donation-page .donation-shell,
+.availability-page .shell,
+.emergency-page .shell,
+.requests-page .requests-shell,
+.profile-page .profile-shell,
+.settings-page .settings-shell{width:min(1480px,calc(100% - 48px))!important;margin:0 auto!important;padding-top:18px!important}
+
+/* Equal premium hero target */
+.ai-page .hero{min-height:520px!important}
+.donation-page .history-hero-v2{min-height:520px!important}
+.availability-page .hero{min-height:520px!important;padding:42px 0 32px!important}
+.emergency-page .hero{min-height:520px!important;padding:42px 0 30px!important}
+.requests-page .hero{min-height:520px!important}
+.profile-page .profile-hero{min-height:520px!important}
+.settings-page .settings-hero{min-height:520px!important}
+
+/* Keep hero typography visually balanced */
+.ai-page .copy,.donation-page .hero-v2-copy{padding-top:52px!important;padding-bottom:52px!important}
+.requests-page .hero-copy{padding-top:52px!important;padding-bottom:38px!important}
+
+@media(max-width:900px){
+  .donor-dashboard .dashboard-main{padding-top:10px!important}
+  .donor-dashboard .command-center{min-height:0!important;padding:28px 24px!important}
+  .ai-page .hero,.donation-page .history-hero-v2,.availability-page .hero,.emergency-page .hero,.requests-page .hero,.profile-page .profile-hero,.settings-page .settings-hero{min-height:0!important}
+  .ai-page .shell,.donation-page .donation-shell,.availability-page .shell,.emergency-page .shell,.requests-page .requests-shell,.profile-page .profile-shell,.settings-page .settings-shell{width:calc(100% - 24px)!important;padding-top:10px!important}
+}
