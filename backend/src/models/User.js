@@ -59,6 +59,51 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+
+    emailVerificationOTP: {
+      type: String,
+      default: null,
+    },
+
+    emailVerificationOTPExpires: {
+      type: Date,
+      default: null,
+    },
+
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    phoneVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    organizationVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    organizationVerificationStatus: {
+      type: String,
+      default: "NOT_REQUIRED",
+    },
+
+    organizationVerificationSource: {
+      type: String,
+      default: "",
+    },
+
+    organizationVerificationMessage: {
+      type: String,
+      default: "",
+    },
+
+    organizationVerifiedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

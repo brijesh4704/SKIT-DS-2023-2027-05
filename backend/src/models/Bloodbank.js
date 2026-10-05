@@ -1,0 +1,46 @@
+const mongoose = require("mongoose");
+
+const bloodBankSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  bloodBankName: String,
+  licenseNumber: String,
+  eraktkoshId: String,
+  firstRegistrationDate: Date,
+  licenseStartDate: Date,
+  licenseEndDate: Date,
+  category: String,
+  dghsSupported: String,
+  componentFacility: String,
+  apheresisFacility: String,
+  helplineNumber: String,
+  numberOfBeds: Number,
+  donorTypes: [String],
+  donationTypes: [String],
+  componentTypes: [String],
+  bagTypes: [String],
+  ttiTypes: [String],
+  officialEmail: String,
+  address: String,
+  city: String,
+  state: String,
+  pincode: String,
+  contactPerson: {
+    name: String,
+    designation: String,
+    phone: String,
+  },
+  registrationDocument: {
+    name: String,
+    path: String,
+    sha256: String,
+    uploadedAt: Date,
+  },
+  isVerified: Boolean,
+  isActive: Boolean,
+  verificationStatus: String,
+  verificationSource: String,
+  verificationMessage: String,
+  verifiedAt: Date,
+}, { timestamps: true });
+
+module.exports = mongoose.model("BloodBank", bloodBankSchema);
