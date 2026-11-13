@@ -1,0 +1,25 @@
+/* BloodLink AI shared 3D background — global stylesheet */
+.blood-bank-shell{isolation:isolate;background:linear-gradient(135deg,#fff8fb 0%,#ffedf3 48%,#fff8fb 100%);}
+        .blood-bank-3d-bg{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none;contain:paint;background:radial-gradient(ellipse at 78% 19%,rgba(255,158,190,.40),transparent 30%),radial-gradient(ellipse at 7% 53%,rgba(255,205,220,.42),transparent 32%),radial-gradient(ellipse at 56% 90%,rgba(250,163,192,.24),transparent 34%);}
+        .bl3d-grid{position:absolute;inset:0;opacity:.48;background-image:linear-gradient(rgba(173,35,79,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(173,35,79,.035) 1px,transparent 1px);background-size:54px 54px;mask-image:linear-gradient(180deg,#000 0%,transparent 85%);}
+        .bl3d-glow{position:absolute;border-radius:50%;filter:blur(58px);}
+        .bl3d-glow-a{width:430px;height:430px;right:-130px;top:100px;background:rgba(255,83,137,.24);}
+        .bl3d-glow-b{width:360px;height:360px;left:-170px;top:42%;background:rgba(255,152,185,.22);}
+        .bl3d-orbit{position:absolute;right:-95px;top:220px;width:510px;height:290px;border:1px solid rgba(211,29,83,.17);border-radius:50%;transform-style:preserve-3d;}
+        .bl3d-orbit-a{transform:rotateX(68deg) rotateZ(-28deg);animation:bl3d-orbit-spin 30s linear infinite;}
+        .bl3d-orbit-b{width:430px;height:430px;right:-50px;top:145px;transform:rotateY(65deg) rotateZ(20deg);border-color:rgba(211,29,83,.12);animation:bl3d-orbit-spin 38s linear infinite reverse;}
+        .bl3d-orbit-c{width:570px;height:360px;right:-120px;top:195px;transform:rotateX(72deg) rotateZ(57deg);border-color:rgba(255,255,255,.8);}
+        .bl3d-sphere{position:absolute;border-radius:50%;transform-style:preserve-3d;}
+        .bl3d-sphere-main{width:clamp(230px,22vw,340px);aspect-ratio:1;right:5.8%;top:240px;background:radial-gradient(ellipse at 27% 19%,#fff 0%,#fff0f5 3%,#ffadc4 8%,transparent 19%),radial-gradient(ellipse at 31% 27%,#ff8eae 0%,#f34879 24%,#d91b53 49%,#a20e3d 73%,#4e061f 100%);box-shadow:inset -30px -36px 62px rgba(49,0,18,.42),inset 18px 14px 32px rgba(255,255,255,.68),0 48px 95px rgba(171,17,67,.24);animation:bl3d-float 8s ease-in-out infinite;}
+        .bl3d-sphere-main:before{content:"";position:absolute;inset:12% 17% 19% 12%;border-top:2px solid rgba(255,255,255,.8);border-radius:50%;transform:rotate(-32deg);filter:blur(.5px);}
+        .bl3d-sphere-core{position:absolute;width:31%;aspect-ratio:1;left:35%;top:35%;border-radius:50%;background:radial-gradient(circle at 30% 24%,#ff8fae,#ca164d 56%,#680826 100%);box-shadow:inset -10px -12px 22px rgba(48,0,17,.42),0 12px 35px rgba(68,0,25,.26);border:1px solid rgba(255,255,255,.4);}
+        .bl3d-sphere-small{width:76px;height:76px;right:31%;top:170px;background:radial-gradient(circle at 28% 23%,#fff 0%,#ffc3d4 12%,#f35b88 42%,#ad103f 100%);box-shadow:inset -9px -10px 18px #7b092c55,0 20px 38px #a8154628;animation:bl3d-float 6s ease-in-out infinite reverse;}
+        .bl3d-sphere-mini{width:25px;height:25px;right:14%;top:165px;background:radial-gradient(circle at 28% 22%,#fff,#f98bab 38%,#c71850);box-shadow:0 8px 18px #a8154628;animation:bl3d-float 5s ease-in-out infinite;}
+        .bl3d-particle{position:absolute;width:11px;height:11px;border-radius:50%;background:linear-gradient(145deg,#ffc2d4,#cf1d55);box-shadow:0 0 0 8px rgba(220,28,82,.06),0 5px 14px #b0184b2b;}
+        .bl3d-particle-a{right:28%;top:390px}.bl3d-particle-b{right:7%;top:485px;width:8px;height:8px}.bl3d-particle-c{right:22%;top:690px;width:14px;height:14px;}
+        .blood-bank-content,.bln-nav-wrap,.blood-bank-shell>footer{position:relative;z-index:1;}
+        .bb-page,.bbx-page,.bbn-shell,.ni-page,.tx-page,.page,.bb-settings-page{background:transparent!important;}
+        @keyframes bl3d-float{0%,100%{transform:translate3d(0,0,0) rotateY(-7deg)}50%{transform:translate3d(-14px,-20px,12px) rotateY(8deg)}}
+        @keyframes bl3d-orbit-spin{from{filter:hue-rotate(0deg)}to{filter:hue-rotate(16deg)}}
+        @media(max-width:800px){.bl3d-sphere-main{width:210px;right:-80px;top:300px;opacity:.75}.bl3d-sphere-small{right:25%;top:210px;width:48px;height:48px}.bl3d-sphere-mini{right:10%;top:250px}.bl3d-orbit{right:-210px;top:270px}.bl3d-orbit-b{right:-190px}.bl3d-orbit-c{right:-230px}.bl3d-glow-a{right:-230px}.bl3d-particle-a{right:22%;top:450px}}
+        @media(prefers-reduced-motion:reduce){.bl3d-sphere,.bl3d-sphere-small,.bl3d-sphere-mini,.bl3d-orbit-a,.bl3d-orbit-b{animation:none!important}}
